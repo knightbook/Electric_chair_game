@@ -1,7 +1,9 @@
 # electric_shock.py
-def handle_electric_shock(attacker, chair_choice, electric_chair, player_electric_shocks):
+
+# 攻撃プレイヤーが選んだ椅子に電気が流れていた場合の処理を行う関数
+def handle_electric_shock(player, chair_choice, electric_chair):
     if chair_choice == electric_chair:
-        player_electric_shocks[attacker] += 1
-        if player_electric_shocks[attacker] >= 3:
-            return False  # Player is out
+        player.electric_shocks += 1
+        if player.electric_shocks >= 3:
+            return False  # プレイヤー敗退
     return True

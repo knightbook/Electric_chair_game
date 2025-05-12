@@ -1,37 +1,37 @@
+#game_logic.py
 from electric_shock import handle_electric_shock
 from scoring import update_score
 
-def play_turn(attacker, defender, player_scores, player_electric_shocks, available_chairs, turn_scores, chair_choice, electric_chair):
-    # 電流処理
-    game_active = handle_electric_shock(attacker, chair_choice, electric_chair, player_electric_shocks)
-    
-    # 電流を受けた場合、椅子は場に残る
+# 1ターンの処理を行う関数（Playerインスタンスを直接受け取る）
+def play_turn(attacker, defender, available_chairs, chair_choice, electric_chair):
+    shocked = False
+
+    # 電撃処理（生存したかどうか）
+    game_active = handle_electric_shock(attacker, chair_choice, electric_chair)
+
     if not game_active:
-        print(f"💀 プレイヤー{attacker + 1}は電流を3回受けたため敗退しました！")
-        turn_scores[attacker].append(0)
-        # 電流が流れた椅子は除外しない
-        return False, player_scores, player_electric_shocks
+        shocked = True
+        attacker.turn_scores.append(0)
+        return False, shocked
 
-    # 電流が流れている椅子を選んだ場合、得点しない
     if chair_choice == electric_chair:
-        print(f"守り側の椅子{chair_choice}に電流が流れているため、得点にはなりません。")
-        return True, player_scores, player_electric_shocks
+        shocked = True
+        attacker.score = 0  # 電流が流れた場合、スコアをリセット
+        attacker.turn_scores.append(0)
+        return True, shocked
 
-    # 得点処理（electric_chairを引き渡す）
-    update_score(attacker, chair_choice, player_scores, turn_scores, electric_chair)
-    print(f"✅ 椅子 {chair_choice} に座り、{chair_choice} 点獲得！現在の得点: {player_scores[attacker]} 点")
-
-    # 得点された椅子のみを除外
+    # 電流が流れなかった場合、座った椅子のポイントを加算
+    update_score(attacker, chair_choice, electric_chair)
     available_chairs.remove(chair_choice)
 
-    return True, player_scores, player_electric_shocks
+    return True, shocked
 
-def check_game_over(player_scores, player_electric_shocks):
-    for i in range(2):
-        if player_electric_shocks[i] >= 3:
-            print(f"💀 プレイヤー{i + 1} は電流を3回受けたため敗北！")
+# 勝敗条件チェック（Playerインスタンスのリストを受け取る）
+def check_game_over(players):
+    for player in players:
+        if player.electric_shocks >= 3:
             return True
-        if player_scores[i] > 40:
-            print(f"🏆 プレイヤー{i + 1} が40点を超えたため勝利！")
+        if player.score > 40:
             return True
     return False
+
