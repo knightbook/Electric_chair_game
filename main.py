@@ -2,12 +2,12 @@
 import pygame
 import math
 import random
-import time
+import os
 
 from game_logic import play_turn, check_game_over
 from chair_buttons import draw_chair_buttons
-from text_drawer import draw_text
-from prompt_defender import prompt_defender_choice
+from ui_elements import draw_title, draw_rules_plate, draw_prompt
+
 from scoreboard import display_scoreboard
 
 from game_state import GameState  # Playerはgame_state内で扱う
@@ -15,8 +15,10 @@ from game_state import GameState  # Playerはgame_state内で扱う
 pygame.init()
 
 # --- 定数定義 ---
-FONT = pygame.font.Font('C:/Python学習/electric_chair_game/font/DotGothic16-Regular.ttf', 24)
-TITLE_FONT = pygame.font.Font('C:/Python学習/electric_chair_game/font/DotGothic16-Regular.ttf', 40)
+font_path = os.path.join('font', 'DotGothic16-Regular.ttf')  # 'font' フォルダ内のフォント
+TITLE_FONT = pygame.font.Font(font_path, 40)
+FONT = pygame.font.Font(font_path, 24)
+
 WHITE = (255, 255, 255)
 GRAY = (200, 200, 200)
 BLACK = (0, 0, 0)
@@ -27,14 +29,11 @@ RADIUS = 150
 screen = pygame.display.set_mode((950, 650))
 pygame.display.set_caption("Electric Chair Game")
 
-# --- タイトル描画 ---
-def draw_title(screen):
-    title_text = TITLE_FONT.render("電気椅子ゲーム", True, BLACK)
-    screen.blit(title_text, (screen.get_width() // 2 - title_text.get_width() // 2, 10))
+
 
 # --- 電撃エフェクト描画 ---
 def draw_electric_shock_effect(screen, elapsed_time):
-    if elapsed_time < 5000:
+    if elapsed_time < 1500:
         for _ in range(10):
             start_x = CENTER_X + random.randint(-150, 150)
             start_y = CENTER_Y + random.randint(-150, 150)
@@ -43,31 +42,7 @@ def draw_electric_shock_effect(screen, elapsed_time):
             pygame.draw.line(screen, (255, 255, 0), (start_x, start_y), (end_x, end_y), 5)
         return True
     return False
-# --- ルールプレートの設置 ---
-def draw_rules_plate(screen, font):
-    plate_x = 600
-    plate_y = 100
-    plate_width = 300
-    plate_height = 180
-    plate_color = (0, 0, 0)
-    border_color = (255, 255, 255)
-    text_color = (255, 255, 255)
-    title_color = (255, 0, 0)
 
-    # 背景と枠線
-    pygame.draw.rect(screen, plate_color, (plate_x, plate_y, plate_width, plate_height))
-    pygame.draw.rect(screen, border_color, (plate_x, plate_y, plate_width, plate_height), 2)
-
-    # タイトルとルール文
-    lines = [
-        ("勝利条件", title_color),
-        ("▼最終的なPで上回る", text_color),
-        ("▼40Pを先取する", text_color),
-        ("▼電流を3回食らわせる", text_color)
-    ]
-    for i, (text, color) in enumerate(lines):
-        label = font.render(text, True, color)
-        screen.blit(label, (plate_x + 10, plate_y + 10 + i * 30))
 
 # --- メインゲームループ ---
 def game_loop():
@@ -77,7 +52,7 @@ def game_loop():
 
     while running:
         screen.fill(GRAY)
-        draw_title(screen)
+        draw_title(screen, TITLE_FONT)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -136,7 +111,7 @@ def game_loop():
 
         # プロンプト表示
         prompt_text = "守り側の椅子を選択してください" if game_state.awaiting_defender else "攻め側の椅子を選択してください"
-        prompt_defender_choice(screen, prompt_text, FONT)
+        draw_prompt(screen, prompt_text, FONT)  # draw_promptを使って表示
         draw_rules_plate(screen, FONT)
         pygame.display.update()
         clock.tick(30)

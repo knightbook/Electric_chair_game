@@ -21,6 +21,13 @@ Electric Chair Game
 
 電流を3回食らわせる
 
+## 🎬 デモプレイ
+
+ゲームのデモプレイは以下のGIFでご覧いただけます：
+
+![Electric Chair Game Demo](images/demo.gif)
+
+
 💻 必要環境
 
 Python 3.9以上推奨

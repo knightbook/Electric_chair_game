@@ -1,37 +1,34 @@
-#game_logic.py
-from electric_shock import handle_electric_shock
-from scoring import update_score
+# game_logic.py
+# 最終チェック済み ✅
+# ゲームのターン処理と勝敗条件を管理するモジュール。
 
-# 1ターンの処理を行う関数（Playerインスタンスを直接受け取る）
+from score_and_shock import handle_shock_and_score
+
+
+# 1ターンの処理を行う関数
+# 攻撃プレイヤー（attacker）と守りプレイヤー（defender）を受け取り、選択した椅子が電気椅子だったかをチェック。
 def play_turn(attacker, defender, available_chairs, chair_choice, electric_chair):
-    shocked = False
+    shocked = chair_choice == electric_chair
+    game_active = handle_shock_and_score(attacker, chair_choice, electric_chair)
 
-    # 電撃処理（生存したかどうか）
-    game_active = handle_electric_shock(attacker, chair_choice, electric_chair)
+    if shocked:
+        attacker.score = 0
+        attacker.turn_scores[-1] = 0  # スコア履歴の修正
 
     if not game_active:
-        shocked = True
-        attacker.turn_scores.append(0)
         return False, shocked
 
-    if chair_choice == electric_chair:
-        shocked = True
-        attacker.score = 0  # 電流が流れた場合、スコアをリセット
-        attacker.turn_scores.append(0)
-        return True, shocked
-
-    # 電流が流れなかった場合、座った椅子のポイントを加算
-    update_score(attacker, chair_choice, electric_chair)
     available_chairs.remove(chair_choice)
 
     return True, shocked
 
-# 勝敗条件チェック（Playerインスタンスのリストを受け取る）
+
+# 勝敗条件をチェックする関数
+# プレイヤーが感電回数3回以上またはスコア40以上でゲームオーバー
 def check_game_over(players):
     for player in players:
         if player.electric_shocks >= 3:
-            return True
+            return True  # 3回感電したプレイヤーがいる場合、ゲーム終了
         if player.score > 40:
-            return True
-    return False
-
+            return True  # スコアが40を超えたプレイヤーがいる場合、ゲーム終了
+    return False  # どちらの条件にも該当しない場合、ゲーム続行
